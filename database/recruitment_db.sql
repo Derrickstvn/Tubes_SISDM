@@ -94,3 +94,78 @@ INSERT INTO interviews (applicant_id, job_id, interview_date, status, notes) VAL
 (8, 8, '2024-03-20 09:00:00', 'Completed', 'Lolos dan diterima'),
 (9, 9, '2024-04-05 11:00:00', 'Scheduled', 'Interview finance'),
 (10, 10, '2024-04-15 15:00:00', 'Scheduled', 'Interview customer support');
+
+-- =============================================
+-- TABLE: employees
+-- =============================================
+CREATE TABLE employees (
+    employee_id INT AUTO_INCREMENT PRIMARY KEY,
+    applicant_id INT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    department VARCHAR(100) NOT NULL,
+    basic_salary DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+    join_date DATE NOT NULL,
+    status ENUM('Active', 'Resigned') DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (applicant_id) REFERENCES applicants(applicant_id) ON DELETE SET NULL
+);
+
+-- =============================================
+-- TABLE: attendance
+-- =============================================
+CREATE TABLE attendance (
+    attendance_id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    date DATE NOT NULL,
+    check_in TIME NULL,
+    check_out TIME NULL,
+    status ENUM('Present', 'Absent', 'Sick', 'Leave', 'Permit') DEFAULT 'Present',
+    notes VARCHAR(255) NULL,
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_employee_date (employee_id, date)
+);
+
+-- =============================================
+-- TABLE: payroll
+-- =============================================
+CREATE TABLE payroll (
+    payroll_id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    basic_salary DECIMAL(12, 2) NOT NULL,
+    allowance DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+    deductions DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+    net_salary DECIMAL(12, 2) NOT NULL,
+    payment_date DATE NULL,
+    status ENUM('Pending', 'Paid') DEFAULT 'Pending',
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_employee_month_year (employee_id, month, year)
+);
+
+-- =============================================
+-- DUMMY DATA: employees (4 data)
+-- =============================================
+INSERT INTO employees (applicant_id, full_name, email, phone_number, position, department, basic_salary, join_date) VALUES
+(3, 'Andi Wijaya', 'andi.wijaya@email.com', '081234567892', 'UI/UX Designer', 'Design', 6500000.00, '2024-02-01'),
+(8, 'Linda Sari', 'linda.sari@email.com', '081234567897', 'Content Writer', 'Marketing', 5500000.00, '2024-03-15'),
+(NULL, 'Budi Santoso', 'budi.santoso@email.com', '081234567890', 'Software Engineer', 'Engineering', 8000000.00, '2024-01-20'),
+(NULL, 'Siti Rahayu', 'siti.rahayu@email.com', '081234567891', 'Product Manager', 'Product', 10000000.00, '2024-01-25');
+
+-- =============================================
+-- DUMMY DATA: attendance (8 data)
+-- =============================================
+INSERT INTO attendance (employee_id, date, check_in, check_out, status, notes) VALUES
+(1, CURDATE() - INTERVAL 1 DAY, '08:00:00', '17:00:00', 'Present', ''),
+(2, CURDATE() - INTERVAL 1 DAY, '08:00:00', '17:00:00', 'Present', ''),
+(3, CURDATE() - INTERVAL 1 DAY, '08:00:00', '17:00:00', 'Present', ''),
+(4, CURDATE() - INTERVAL 1 DAY, '08:00:00', '17:00:00', 'Present', ''),
+(1, CURDATE() - INTERVAL 2 DAY, '08:00:00', '17:00:00', 'Present', ''),
+(2, CURDATE() - INTERVAL 2 DAY, NULL, NULL, 'Sick', 'Demam'),
+(3, CURDATE() - INTERVAL 2 DAY, NULL, NULL, 'Absent', 'Tanpa Keterangan'),
+(4, CURDATE() - INTERVAL 2 DAY, '08:00:00', '17:00:00', 'Present', '');
+
